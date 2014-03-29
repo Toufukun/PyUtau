@@ -1,0 +1,45 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.21005.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "pyutau", "pyutau\pyutau.pyproj", "{E3532ED2-E154-42DF-A2B7-81D01642729B}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "pystandalone", "pystandalone\pystandalone.vcxproj", "{9FA5C7D9-C526-40A7-9A7E-99B69CAE92FC}"
+EndProject
+Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "pyutauplus", "pyutauplus\pyutauplus.pyproj", "{D02A0709-1C16-455B-89EC-7940FB97871E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
+		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E3532ED2-E154-42DF-A2B7-81D01642729B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E3532ED2-E154-42DF-A2B7-81D01642729B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E3532ED2-E154-42DF-A2B7-81D01642729B}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{E3532ED2-E154-42DF-A2B7-81D01642729B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E3532ED2-E154-42DF-A2B7-81D01642729B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E3532ED2-E154-42DF-A2B7-81D01642729B}.Release|x64.ActiveCfg = Release|Any CPU
+		{E3532ED2-E154-42DF-A2B7-81D01642729B}.Release|x64.Build.0 = Release|Any CPU
+		{9FA5C7D9-C526-40A7-9A7E-99B69CAE92FC}.Debug|Any CPU.ActiveCfg = Debug|Win32
+		{9FA5C7D9-C526-40A7-9A7E-99B69CAE92FC}.Debug|x64.ActiveCfg = Debug|x64
+		{9FA5C7D9-C526-40A7-9A7E-99B69CAE92FC}.Debug|x64.Build.0 = Debug|x64
+		{9FA5C7D9-C526-40A7-9A7E-99B69CAE92FC}.Release|Any CPU.ActiveCfg = Release|Win32
+		{9FA5C7D9-C526-40A7-9A7E-99B69CAE92FC}.Release|x64.ActiveCfg = Release|x64
+		{9FA5C7D9-C526-40A7-9A7E-99B69CAE92FC}.Release|x64.Build.0 = Release|x64
+		{D02A0709-1C16-455B-89EC-7940FB97871E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D02A0709-1C16-455B-89EC-7940FB97871E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D02A0709-1C16-455B-89EC-7940FB97871E}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{D02A0709-1C16-455B-89EC-7940FB97871E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D02A0709-1C16-455B-89EC-7940FB97871E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D02A0709-1C16-455B-89EC-7940FB97871E}.Release|x64.ActiveCfg = Release|Any CPU
+		{D02A0709-1C16-455B-89EC-7940FB97871E}.Release|x64.Build.0 = Release|Any CPU
+		{D02A0709-1C16-455B-89EC-7940FB97871E}.Release|x64.Deploy.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
