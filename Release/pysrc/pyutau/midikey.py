@@ -33,6 +33,8 @@ class MidiKey:
         lKey = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"]
         octave = (self.key - 11) / 12
         return "%s%d" % (lKey[self.key % 12],octave)
+    def __str__(self):
+        return "%s(%d)" % (self.to_letter_key(),self.key)
 
 def _test():
     while True:

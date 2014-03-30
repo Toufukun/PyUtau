@@ -11,16 +11,13 @@
     <OutputPath>.</OutputPath>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
-    <PublishUrl>$(SolutionDir)\Release\</PublishUrl>
+    <PublishUrl>$(SolutionDir)Release\pysrc</PublishUrl>
+    <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
+    <IsWindowsApplication>False</IsWindowsApplication>
     <InterpreterId>
     </InterpreterId>
     <InterpreterVersion>
     </InterpreterVersion>
-    <LaunchProvider>Standard Python launcher</LaunchProvider>
-    <CommandLineArguments />
-    <InterpreterPath />
-    <InterpreterArguments />
-    <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'" />
   <PropertyGroup Condition="'$(Configuration)' == 'Release'" />

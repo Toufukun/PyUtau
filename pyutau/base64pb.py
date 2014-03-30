@@ -66,7 +66,10 @@ class UtauBase64PitchBend:
                             self.pba.append(buf)
             i+=1
     def __getitem__(self, index):
-        return self.pba[index]
+        if index >= len(self.pba) or index < 0:
+            return 0
+        else:
+            return self.pba[index]
     def get_array(self):
         return self.pba[:]
     def get_base64(self):
@@ -88,6 +91,8 @@ class UtauBase64PitchBend:
         if cnt > 1:
             str+="#%d#" % cnt
         return str
+    def __str__(self):
+        return str(self.pba)
 
 def _test():
     while True:

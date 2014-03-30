@@ -32,7 +32,7 @@ def resampler(argv):
     else:
         ptr_sel_ed = ptr_sel_st
         ptr_sel_st+=1
-        while ptr_sel_ed<len(arg["flags"]) and arg["flags"][ptr_sel_ed].isdigit:
+        while ptr_sel_ed < len(arg["flags"]) and arg["flags"][ptr_sel_ed].isdigit:
             ptr_sel_ed+=1
         resampler_num = arg["flags"][ptr_sel_st:ptr_sel_ed]
         if resampler_num == "":
@@ -49,8 +49,8 @@ def resampler(argv):
     if target.endswith("exe"):
         cmdarg = ""
         for x in argv[1:]:
-            if str(x).find(" ")==-1:
-                if x=="":
+            if str(x).find(" ") == -1:
+                if x == "":
                     cmdarg+="0 "
                 else:
                     cmdarg+=x + " "
@@ -59,5 +59,6 @@ def resampler(argv):
         # print "%s\\%s %s" % (dirname,target,cmdarg)
         os.system("%s\\%s %s" % (dirname,target,cmdarg))
     else:
-        exec("import %s",target)
-        exec("%s.resample(%s)",target,argv)
+        print target,argv
+        exec("import %s" % target)
+        exec("%s.resample(%s)" % (target,argv))
