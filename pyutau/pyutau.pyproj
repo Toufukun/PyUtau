@@ -21,6 +21,8 @@
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'" />
   <PropertyGroup Condition="'$(Configuration)' == 'Release'" />
   <ItemGroup>
+    <Compile Include="ustnote.py" />
+    <Compile Include="ustreader.py" />
     <Compile Include="__init__.py" />
     <Compile Include="resamplerargs.py" />
     <Compile Include="base64pb.py" />

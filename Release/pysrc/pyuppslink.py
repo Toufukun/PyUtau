@@ -1,6 +1,9 @@
 from pyutau import *
 import sys,locale,os,subprocess
 
+_system_encoding=locale.getdefaultlocale()[1]
+# _system_encoding='cp936'
+
 def _calc_synth_pos(orig_pos,cons_len,cons_spd_mul,rest_mul,msec_per_beat,pit_time_shift):
     # print orig_pos,cons_len,cons_spd_mul,rest_mul,msec_per_beat,pit_time_shift
     if orig_pos>cons_len:
@@ -27,13 +30,13 @@ def resample(argv):
     arg=UtauResamplerArguments(argv[1:])
 
     # convert file name into utf8 (for Praat scripting)
-    in_wav_u=unicode(arg["in_wav"],locale.getdefaultlocale()[1])
-    out_wav_u=unicode(arg["out_wav"],locale.getdefaultlocale()[1])
+    in_wav_u=arg["in_wav"].decode(_system_encoding).encode('utf-8')
+    out_wav_u=arg["out_wav"].decode(_system_encoding).encode('utf-8')
 
     # preprocess the file using sox
     dest_vol_db=-3*(20**(1-arg["vol"]/100.0))
     new_in_wav="%s-2.wav" % arg["in_wav"]
-    new_in_wav_u=unicode(new_in_wav,locale.getdefaultlocale()[1])
+    new_in_wav_u=new_in_wav.decode(_system_encoding).encode('utf-8')
     sox_command='"%s\\sox.exe" --norm=%.4f "%s" "%s" trim %f -%f pad 0 %f' %\
         (dirname,dest_vol_db,arg["in_wav"],new_in_wav,
          arg["head_offset"]/1000.0,arg["tail_offset"]/1000.0,arg["dest_dur"]/1000.0)
@@ -51,14 +54,15 @@ def resample(argv):
     pitch_tier_file_name=new_in_wav+".txt"
     init_script_file_name=new_in_wav+".init.praat"
     output=open(init_script_file_name,'w')
-    output.write(u"Read from file... %s\n" % new_in_wav_u +
-                 u"select 1\n" +
-                 u"To Pitch... %f %d %d\n" % (manip_accuracy,orig_pit_floor,orig_pit_ceiling) +
-                 u"Down to PitchTier\n" +
-                 u"Save as text file... %s.txt\n" % new_in_wav_u)
+    output.write("Read from file... %s\n" % new_in_wav_u +
+                 "select 1\n" +
+                 "To Pitch... %f %d %d\n" % (manip_accuracy,orig_pit_floor,orig_pit_ceiling) +
+                 "Down to PitchTier\n" +
+                 "Save as text file... %s.txt\n" % new_in_wav_u)
     output.close()
 
-    subprocess.call('"%s\\praatcon.exe" "%s"' % (dirname,init_script_file_name))
+    init_script_file_name_u=init_script_file_name.decode(_system_encoding).encode('utf-8')
+    subprocess.call('"%s\\praatcon.exe" "%s"' % (dirname,init_script_file_name_u))
 
     orig_pit=[]
     pit_pos=[]
@@ -110,36 +114,37 @@ def resample(argv):
 
     synth_script_file_name=new_in_wav+".synth.praat"
     output=open(synth_script_file_name,'w')
-    output.write(u"Read from file... %s\n" % new_in_wav_u+
-                 u"select 1\n"+
-                 u"To Manipulation... %f %d %d\n"%(manip_accuracy,orig_pit_floor,orig_pit_ceiling)+
-                 u"Extract pitch tier\n"+
-                 u"select 2\n"+
-                 u"Extract duration tier\n"+
-                 u"select 3\n")
+    output.write("Read from file... %s\n" % new_in_wav_u+
+                 "select 1\n"+
+                 "To Manipulation... %f %d %d\n"%(manip_accuracy,orig_pit_floor,orig_pit_ceiling)+
+                 "Extract pitch tier\n"+
+                 "select 2\n"+
+                 "Extract duration tier\n"+
+                 "select 3\n")
     for i in range(0,pit_len):
-        output.write(u"val[%d]=%f\npos[%d]=%f\n" % (i,dest_pit[i],i,pit_pos[i]))
-    output.write(u"Remove points between... 0.0 20.0\n"+
-                 u"for i from 0 to %d\n"%(pit_len-1)+
-                 u"   vali = val[i]\n"+
-                 u"   posi = pos[i]\n"+
-                 u"   Add point... posi vali\n"+
-                 u"endfor\n"+
-                 u"plus 2\n"+
-                 u"Replace pitch tier\n"+
-                 u"select 4\n"+
-                 u"Add point... 0 %f\n"%cons_spd_mul+
-                 u"Add point... %0.2f %f\n"%(arg["cons_len"]/1000.0,cons_spd_mul)+
-                 u"Add point... %0.2f+0.01 %f\n"%(arg["cons_len"]/1000.0,rest_mul)+
-                 u"plus 2\n"+
-                 u"Replace duration tier\n"+
-                 u"select 2\n"+
-                 u"Get resynthesis (overlap-add)\n"+
-                 u"select 5\n"+
-                 u"Save as WAV file... %s\n"%out_wav_u)
+        output.write("val[%d]=%f\npos[%d]=%f\n" % (i,dest_pit[i],i,pit_pos[i]))
+    output.write("Remove points between... 0.0 20.0\n"+
+                 "for i from 0 to %d\n"%(pit_len-1)+
+                 "   vali = val[i]\n"+
+                 "   posi = pos[i]\n"+
+                 "   Add point... posi vali\n"+
+                 "endfor\n"+
+                 "plus 2\n"+
+                 "Replace pitch tier\n"+
+                 "select 4\n"+
+                 "Add point... 0 %f\n"%cons_spd_mul+
+                 "Add point... %0.2f %f\n"%(arg["cons_len"]/1000.0,cons_spd_mul)+
+                 "Add point... %0.2f+0.01 %f\n"%(arg["cons_len"]/1000.0,rest_mul)+
+                 "plus 2\n"+
+                 "Replace duration tier\n"+
+                 "select 2\n"+
+                 "Get resynthesis (overlap-add)\n"+
+                 "select 5\n"+
+                 "Save as WAV file... %s\n"%out_wav_u)
     output.close()
     
-    subprocess.call('"%s\\praatcon.exe" "%s"' % (dirname,synth_script_file_name))
+    synth_script_file_name_u=synth_script_file_name.decode(_system_encoding).encode('utf-8')
+    subprocess.call('"%s\\praatcon.exe" "%s"' % (dirname,synth_script_file_name_u))
     # os.remove(new_in_wav)
 
     if True: # degbug

@@ -53,5 +53,3 @@ int runPython(int argc, char* argv[], const char* moduleName, const char* functi
 	PyRun_SimpleString(szCmd);
 	return 0;
 }
-
-
