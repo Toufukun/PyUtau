@@ -14,25 +14,27 @@
 # limitations under the License.
 
 from pyutau import *
-import os
-import sys
+import os,sys,subprocess
 
 def resampler(argv):
+    verbose=True
+
     resampler_list = ["resampler.exe","fresamp.exe","TIPS.exe","pyuppslink"]
-    print argv[0]
     arg = UtauResamplerArguments(argv[1:])
-    for k,v in arg.arg.items():
-        if k == "pit":
-            print k,v.get_array()
-        else:
-            print k,v
+    if verbose:
+        print argv[0]
+        for k,v in arg.arg.items():
+            if k == "pit":
+                print k,v.get_array()
+            else:
+                print k,v
     ptr_sel_st = max(arg["flags"].find("\\"),arg["flags"].find("/"))
     if ptr_sel_st == -1:
         resampler_num = 0
     else:
-        ptr_sel_ed = ptr_sel_st
         ptr_sel_st+=1
-        while ptr_sel_ed < len(arg["flags"]) and arg["flags"][ptr_sel_ed].isdigit:
+        ptr_sel_ed = ptr_sel_st
+        while ptr_sel_ed < len(arg["flags"]) and arg["flags"][ptr_sel_ed].isdigit():
             ptr_sel_ed+=1
         resampler_num = arg["flags"][ptr_sel_st:ptr_sel_ed]
         if resampler_num == "":
@@ -57,8 +59,8 @@ def resampler(argv):
             else:
                     cmdarg+='"' + x + '" '
         # print "%s\\%s %s" % (dirname,target,cmdarg)
-        os.system("%s\\%s %s" % (dirname,target,cmdarg))
+        subprocess.call("%s\\%s %s" % (dirname,target,cmdarg))
     else:
-        print target,argv
+        # print target,argv
         exec("import %s" % target)
         exec("%s.resample(%s)" % (target,argv))

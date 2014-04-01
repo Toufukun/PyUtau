@@ -15,6 +15,9 @@ def resample(argv):
     dirname,filename = os.path.split(os.path.abspath(argv[0]))
 
     # constant definition
+    verbose=True
+    write_log=True
+    dont_delete_temp_file=False
     pit_blur=3
     pit_blur_gate_hz=10
     msec_per_minute=60*1000*1.0
@@ -33,6 +36,14 @@ def resample(argv):
     in_wav_u=arg["in_wav"].decode(_system_encoding).encode('utf-8')
     out_wav_u=arg["out_wav"].decode(_system_encoding).encode('utf-8')
 
+    # write log
+    if write_log: # debug
+        log_output=open(arg["in_wav"]+".log",'a')
+        log_output.write("Uppslink Log\n\n")
+        log_output.write("arg: \n")
+        for (k,v) in arg.arg.items():
+            log_output.write("%8s=%s\n" % (k.upper(),v))
+
     # preprocess the file using sox
     dest_vol_db=-3*(20**(1-arg["vol"]/100.0))
     new_in_wav="%s-2.wav" % arg["in_wav"]
@@ -40,7 +51,6 @@ def resample(argv):
     sox_command='"%s\\sox.exe" --norm=%.4f "%s" "%s" trim %f -%f pad 0 %f' %\
         (dirname,dest_vol_db,arg["in_wav"],new_in_wav,
          arg["head_offset"]/1000.0,arg["tail_offset"]/1000.0,arg["dest_dur"]/1000.0)
-    print sox_command
     subprocess.call(sox_command)
 
     # process the pitch bend array
@@ -73,7 +83,6 @@ def resample(argv):
         try:
             (k,v)=line.split(" = ")
             v=v[:-2]
-            print 'k="%s" v="%s"' % (k,v)
             if k=="    number":
                 pit_pos.append(float(v))
             elif k=="    value":
@@ -100,7 +109,6 @@ def resample(argv):
     cent=2.0 ** (1.0/1200)
     dest_base_hz=440*(semitone**(arg["dest_key"].to_midi_key()-69))
     cons_spd_mul=100.0/arg["cons_spd"]
-    print arg["dest_dur"], arg["cons_len"], arg["cons_spd"], orig_dur
     rest_mul=(arg["dest_dur"]-arg["cons_len"]*cons_spd_mul)/(orig_dur-arg["cons_len"])
     msec_per_beat=msec_per_minute/arg["tempo"]/utau_pb_accuracy
     pit_time_shift=6
@@ -145,22 +153,22 @@ def resample(argv):
     
     synth_script_file_name_u=synth_script_file_name.decode(_system_encoding).encode('utf-8')
     subprocess.call('"%s\\praatcon.exe" "%s"' % (dirname,synth_script_file_name_u))
-    # os.remove(new_in_wav)
-
-    if True: # degbug
-        output=open(new_in_wav+".log",'a')
-        output.write(u"Uppslink Log\n\n")
-        output.write(u"arg: \n")
-        for (k,v) in arg.arg.items():
-            output.write(u"%8s=%s\n" % (k.upper(),v))
-        output.write(u"PIT:   POS   ORIGINAL   THEOREIC    REFINED       DEST  ORIG_POS\n")
+    if not dont_delete_temp_file:
+        os.remove(new_in_wav)
+        os.remove(init_script_file_name)
+        os.remove(synth_script_file_name)
+    
+    # write log
+    if write_log: # debug
+        log_output.write("PIT:   POS   ORIGINAL   THEOREIC    REFINED       DEST  ORIG_POS\n")
         for i in range(pit_len):
             orig_pos=pit_pos[i]*1000
             synth_pos=_calc_synth_pos(orig_pos,arg["cons_len"],cons_spd_mul,rest_mul,msec_per_beat,pit_time_shift)
-            output.write("%10f %10f %10f %10f %10f %10d\n" % (pit_pos[i],orig_pit[i],theoreic_pit[i],refined_pit[i],dest_pit[i],synth_pos))
-        output.write("\n")
-        output.write("Cons. Mul=%f Rest Mul=%f\n" % (cons_spd_mul,rest_mul))
-        output.write("\n")
+            log_output.write("%10f %10f %10f %10f %10f %10d\n" % (pit_pos[i],orig_pit[i],theoreic_pit[i],refined_pit[i],dest_pit[i],synth_pos))
+        log_output.write("\n")
+        log_output.write("Cons. Mul=%f Rest Mul=%f\n" % (cons_spd_mul,rest_mul))
+        log_output.write("\n")
+        log_output.close()
 
 if __name__=="__main__":
     resample(sys.argv)
