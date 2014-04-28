@@ -48,9 +48,14 @@ def resample(argv):
     dest_vol_db=-3*(20**(1-arg["vol"]/100.0))
     new_in_wav="%s-2.wav" % arg["in_wav"]
     new_in_wav_u=new_in_wav.decode(_system_encoding).encode('utf-8')
-    sox_command='"%s\\sox.exe" --norm=%.4f "%s" "%s" trim %f -%f pad 0 %f' %\
+    trim2=arg["tail_offset"]/1000.0
+    if trim2>=0:
+        trim2="-"+str(trim2)
+    else:
+        trim2=str(-trim2)
+    sox_command='"%s\\sox.exe" --norm=%.4f "%s" "%s" trim %f %s pad 0 %f' %\
         (dirname,dest_vol_db,arg["in_wav"],new_in_wav,
-         arg["head_offset"]/1000.0,arg["tail_offset"]/1000.0,arg["dest_dur"]/1000.0)
+         arg["head_offset"]/1000.0,trim2,arg["dest_dur"]/1000.0)
     subprocess.call(sox_command)
 
     # process the pitch bend array
@@ -116,7 +121,7 @@ def resample(argv):
     for i in range(pit_len):
         orig_pos=pit_pos[i]*1000
         synth_pos=_calc_synth_pos(orig_pos,arg["cons_len"],cons_spd_mul,rest_mul,msec_per_beat,pit_time_shift)
-        theoreic_pit.append(dest_base_hz*(cent ** in_pb[synth_pos]))
+        theoreic_pit.append(dest_base_hz*(cent ** in_pb[min(synth_pos,len(in_pb)-1)]))
 
     dest_pit=[orig_pit[i]+theoreic_pit[i]-refined_pit[i] for i in range(0,pit_len)]
 
