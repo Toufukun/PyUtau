@@ -1,3 +1,18 @@
+# PyUtauPlus Synth Engine - Uppslink
+# Copyright 2013-2014 Toufukun
+
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+
+#     http://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 from pyutau import *
 import sys,locale,os,subprocess
 
@@ -14,27 +29,36 @@ def _calc_synth_pos(orig_pos,cons_len,cons_spd_mul,rest_mul,msec_per_beat,pit_ti
 def resample(argv):
     dirname,filename = os.path.split(os.path.abspath(argv[0]))
 
-    # constant definition
+    # settings
     verbose=True
     write_log=True
     dont_delete_temp_file=False
+    uses_cache=True
     pit_blur=3
     pit_blur_gate_hz=10
+    orig_pit_floor=75
+    orig_pit_ceiling=600
+
+    # constant definition
     msec_per_minute=60*1000*1.0
     ticks_per_beat=480*1.0
     in_pb_max_len=4096
     manip_pb_max_len=1024
     manip_accuracy=0.005
-    orig_pit_floor=75
-    orig_pit_ceiling=600
 
     # convert arguments
     dirname,filename=os.path.split(os.path.abspath(argv[0]))
     arg=UtauResamplerArguments(argv[1:])
+    arg_hash=''.join([arg["in_wav"],str(arg["head_offset"]),str(arg["cons_len"]),str(arg["tail_offset"])])
+    arg_hash='%08x'%(binascii.crc32(arg_hash)&0xffffffff)
 
     # convert file name into utf8 (for Praat scripting)
     in_wav_u=arg["in_wav"].decode(_system_encoding).encode('utf-8')
     out_wav_u=arg["out_wav"].decode(_system_encoding).encode('utf-8')
+
+    # create cache folder
+    if not os.path.exists("$s\\Cache"):
+        os.mkdir("$s\\Cache")
 
     # write log
     if write_log: # debug
@@ -43,20 +67,25 @@ def resample(argv):
         log_output.write("arg: \n")
         for (k,v) in arg.arg.items():
             log_output.write("%8s=%s\n" % (k.upper(),v))
+        log_output.write("hash "+arg_hash)
 
     # preprocess the file using sox
     dest_vol_db=-3*(20**(1-arg["vol"]/100.0))
-    new_in_wav="%s-2.wav" % arg["in_wav"]
-    new_in_wav_u=new_in_wav.decode(_system_encoding).encode('utf-8')
-    trim2=arg["tail_offset"]/1000.0
-    if trim2>=0:
-        trim2="-"+str(trim2)
+    if uses_cache:
+        new_in_wav="%s\\Cache\\$s.wav" % [dirname,arg_hash]
     else:
-        trim2=str(-trim2)
-    sox_command='"%s\\sox.exe" --norm=%.4f "%s" "%s" trim %f %s pad 0 %f' %\
-        (dirname,dest_vol_db,arg["in_wav"],new_in_wav,
-         arg["head_offset"]/1000.0,trim2,arg["dest_dur"]/1000.0)
-    subprocess.call(sox_command)
+        new_in_wav="%s-2.wav" % arg["in_wav"]
+    new_in_wav_u=new_in_wav.decode(_system_encoding).encode('utf-8')
+    if not (uses_cache and os.path.isfile(new_in_wav)):
+        trim2=arg["tail_offset"]/1000.0
+        if trim2>=0:
+            trim2="-"+str(trim2)
+        else:
+            trim2=str(-trim2)
+        sox_command='"%s\\sox.exe" --norm=%.4f "%s" "%s" trim %f %s pad 0 %f' %\
+            (dirname,dest_vol_db,arg["in_wav"],new_in_wav,
+             arg["head_offset"]/1000.0,trim2,arg["dest_dur"]/1000.0)
+        subprocess.call(sox_command)
 
     # process the pitch bend array
     utau_pb_accuracy=96
@@ -67,21 +96,21 @@ def resample(argv):
         in_pb.append(0)
 
     pitch_tier_file_name=new_in_wav+".txt"
-    init_script_file_name=new_in_wav+".init.praat"
-    output=open(init_script_file_name,'w')
-    output.write("Read from file... %s\n" % new_in_wav_u +
-                 "select 1\n" +
-                 "To Pitch... %f %d %d\n" % (manip_accuracy,orig_pit_floor,orig_pit_ceiling) +
-                 "Down to PitchTier\n" +
-                 "Save as text file... %s.txt\n" % new_in_wav_u)
-    output.close()
-
-    init_script_file_name_u=init_script_file_name.decode(_system_encoding).encode('utf-8')
-    subprocess.call('"%s\\praatcon.exe" "%s"' % (dirname,init_script_file_name_u))
+    if not (uses_cache and os.path.isfile(pitch_tier_file_name)):
+        init_script_file_name=new_in_wav+".init.praat"
+        output=open(init_script_file_name,'w')
+        output.write("Read from file... %s\n" % new_in_wav_u +
+                     "select 1\n" +
+                     "To Pitch... %f %d %d\n" % (manip_accuracy,orig_pit_floor,orig_pit_ceiling) +
+                     "Down to PitchTier\n" +
+                     "Save as text file... %s.txt\n" % new_in_wav_u)
+        output.close()
+        init_script_file_name_u=init_script_file_name.decode(_system_encoding).encode('utf-8')
+        subprocess.call('"%s\\praatcon.exe" "%s"' % (dirname,init_script_file_name_u))
 
     orig_pit=[]
     pit_pos=[]
-    input=open("%s.txt" % new_in_wav)
+    input=open(pitch_tier_file_name)
     input_lines=input.readlines()
     input.close
     for line in input_lines:
